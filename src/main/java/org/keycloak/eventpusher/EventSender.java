@@ -3,17 +3,27 @@ package org.example.keycloak.eventpusher;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
 
+import java.net.URI;
 import java.net.URLDecoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
 public class EventSender {
 
     private final String endpointUrl;
+    private final HttpClient httpClient;
+
 
     public EventSender(String endpointUrl) {
         this.endpointUrl = endpointUrl;
+        this.httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(3))
+                .build();
     }
 
     public void send(Event event) {
@@ -25,8 +35,29 @@ public class EventSender {
         String json = toJson(event);
         System.out.println("[USER EVENT] Sending to " + endpointUrl + ": " + json);
 
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(endpointUrl))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .timeout(Duration.ofSeconds(5))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                System.out.println("[EventPusher] Successfully sent " + type + " event to " + endpointUrl);
+            } else {
+                System.err.println("[EventPusher] Failed to send event (" + response.statusCode() + "): " + response.body());
+            }
+
+        } catch (Exception e) {
+            System.err.println("[EventPusher] Error sending event to " + endpointUrl + ": " + e.getMessage());
+        }
     }
 
+
+    
     private String toJson(Event event) {
         Map<String, String> details = event.getDetails();
 
