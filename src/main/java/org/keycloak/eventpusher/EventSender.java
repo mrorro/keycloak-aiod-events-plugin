@@ -33,7 +33,7 @@ public class EventSender {
         }
 
         String json = toJson(event);
-        System.out.println("[USER EVENT] Sending to " + endpointUrl + ": " + json);
+        //System.out.println("[USER EVENT] Sending to " + endpointUrl + ": " + json);
 
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -45,11 +45,11 @@ public class EventSender {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                System.out.println("[EventPusher] Successfully sent " + type + " event to " + endpointUrl);
-            } else {
-                System.err.println("[EventPusher] Failed to send event (" + response.statusCode() + "): " + response.body());
-            }
+           // if (response.statusCode() >= 200 && response.statusCode() < 300) {
+           //     System.out.println("[EventPusher] Successfully sent " + type + " event to " + endpointUrl);
+           // } else {
+           //     System.err.println("[EventPusher] Failed to send event (" + response.statusCode() + "): " + response.body());
+           // }
 
         } catch (Exception e) {
             System.err.println("[EventPusher] Error sending event to " + endpointUrl + ": " + e.getMessage());

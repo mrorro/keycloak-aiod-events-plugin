@@ -35,7 +35,7 @@ public class EventPusherProviderFactory implements EventListenerProviderFactory 
         if (endpointUrl == null || endpointUrl.isBlank()) {
             endpointUrl = "http://localhost:8080/api/events";
         }
-        System.out.println("[EventPusher] Using endpoint URL: " + endpointUrl);
+        //System.out.println("[EventPusher] Using endpoint URL: " + endpointUrl);
     }
 
     private String loadFromFile() {
