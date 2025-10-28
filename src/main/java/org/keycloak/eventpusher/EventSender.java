@@ -1,4 +1,4 @@
-package org.example.keycloak.eventpusher;
+package org.keycloak.eventpusher;
 
 import org.keycloak.events.Event;
 import org.keycloak.events.EventType;
@@ -61,30 +61,30 @@ public class EventSender {
     private String toJson(Event event) {
         Map<String, String> details = event.getDetails();
 
-        String type = event.getType() != null ? event.getType().toString() : "UNKNOWN";
+        String eventName = event.getType().toString().toLowerCase();
         String realm = event.getRealmId();
         String client = event.getClientId();
-        String user = event.getUserId();
-        String redirectUri = details != null ? details.getOrDefault("redirect_uri", "") : "";
+        String userId = event.getUserId();
         String username = details != null ? details.getOrDefault("username", "") : "";
-        long time = event.getTime();
+        String redirectUri = details != null ? details.getOrDefault("redirect_uri", "") : "";
+//        long time = event.getTime();
 
         Map<String, String> utmParams = extractUtmParams(redirectUri);
 
-        StringBuilder utmJson = new StringBuilder("{");
-        boolean first = true;
+        StringBuilder params = new StringBuilder();
+        params.append(String.format("\"realm\": \"%s\", \"client\": \"%s\", \"username\": \"%s\"",
+                escape(realm), escape(client), escape(username)));
+
         for (Map.Entry<String, String> e : utmParams.entrySet()) {
-            if (!first) utmJson.append(", ");
-            utmJson.append(String.format("\"%s\": \"%s\"", escape(e.getKey()), escape(e.getValue())));
-            first = false;
+            params.append(String.format(", \"%s\": \"%s\"", escape(e.getKey()), escape(e.getValue())));
         }
-        utmJson.append("}");
 
-
-        // Build minimal JSON manually (no dependencies)
         return String.format(
-            "{ \"type\": \"%s\", \"realm\": \"%s\", \"client\": \"%s\", \"user\": \"%s\", \"username\": \"%s\", \"time\": %d, \"utm\": %s }",
-            escape(type), escape(realm), escape(client), escape(user), escape(username), time, utmJson
+             "{ \"client_id\": \"%s\", \"user_id\": \"%s\", \"events\": [{ \"name\": \"%s\", \"params\": { %s } }] }",
+                escape(userId != null ? userId : "anonymous"),
+                escape(userId != null ? userId : "anonymous"),
+                escape(eventName),
+                params
         );
     }
 

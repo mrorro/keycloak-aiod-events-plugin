@@ -1,4 +1,4 @@
-package org.example.keycloak.eventpusher;
+package org.keycloak.eventpusher;
 
 import org.keycloak.Config;
 import org.keycloak.events.EventListenerProvider;

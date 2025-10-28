@@ -1,1 +1,1 @@
-org.example.keycloak.eventpusher.EventPusherProviderFactory
+org.keycloak.eventpusher.EventPusherProviderFactory
